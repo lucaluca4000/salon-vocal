@@ -3,28 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡ CyberVocal & Chat ⚡</title>
+    <title>Espace Vocal et Chat</title>
     
     <script src="https://meet.jit.si/external_api.js"></script>
 
     <style>
-        :root {
-            --bg-color: #0b0e14;
-            --panel-bg: #151a24;
-            --accent-color: #00ffaa;
-            --accent-hover: #00cc88;
-            --text-color: #e2e8f0;
-            --muted-text: #64748b;
-        }
-
         * {
             box-sizing: border-box;
         }
 
         body, html {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #11141a;
+            color: #ffffff;
             margin: 0;
             padding: 0;
             height: 100%;
@@ -32,84 +23,72 @@
             overflow: hidden;
         }
 
-        /* Écran d'accueil */
-        .setup-screen {
+        /* Écran de connexion épuré */
+        .login-screen {
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100%;
             width: 100%;
             padding: 20px;
-            background-image: radial-gradient(circle at top right, rgba(0, 255, 170, 0.05), transparent);
         }
 
-        .app-card {
-            background-color: var(--panel-bg);
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        .login-box {
+            background-color: #1c1f26;
+            padding: 30px;
+            border-radius: 12px;
             text-align: center;
-            max-width: 400px;
+            max-width: 360px;
             width: 100%;
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
         }
 
         h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            margin: 0 0 10px 0;
-            background: linear-gradient(45deg, #fff, var(--accent-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .subtitle {
-            color: var(--muted-text);
-            font-size: 0.95rem;
-            margin-bottom: 30px;
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin: 0 0 20px 0;
+            color: #ffffff;
         }
 
         input {
             width: 100%;
-            padding: 14px 20px;
-            background-color: #1c2330;
-            border: 2px solid transparent;
-            border-radius: 12px;
-            color: #fff;
+            padding: 14px;
+            background-color: #252932;
+            border: 1px solid #383e4c;
+            border-radius: 8px;
+            color: #ffffff;
             font-size: 1rem;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
+            margin-bottom: 15px;
+            outline: none;
         }
 
         input:focus {
-            outline: none;
-            border-color: var(--accent-color);
+            border-color: #52668d;
         }
 
         button {
             width: 100%;
-            background-color: var(--accent-color);
-            color: #05070a;
+            background-color: #ffffff;
+            color: #11141a;
             border: none;
             padding: 14px;
             font-size: 1rem;
-            font-weight: 700;
-            border-radius: 12px;
+            font-weight: 600;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background-color 0.2s;
         }
 
         button:hover {
-            background-color: var(--accent-hover);
+            background-color: #e5e5e5;
         }
 
-        /* Zone de l'appel et du Chat (Plein écran sur Mobile) */
+        /* Écran d'appel */
         .vocal-screen {
             display: none;
             width: 100%;
             height: 100%;
-            position: relative;
-            background-color: #000;
+            background-color: #000000;
         }
 
         #jitsi-container {
@@ -120,13 +99,11 @@
 </head>
 <body>
 
-    <div class="setup-screen" id="setup-screen">
-        <div class="app-card">
-            <h1>⚡ CyberVocal</h1>
-            <p class="subtitle">Vocal & Chat écrit en direct.</p>
-            
-            <input type="text" id="username" placeholder="Entre ton pseudo..." maxlength="15" autocomplete="off">
-            <button onclick="rejoindreSalon()">Rejoindre l'appel</button>
+    <div class="login-screen" id="setup-screen">
+        <div class="login-box">
+            <h1>Salon Vocal & Chat</h1>
+            <input type="text" id="username" placeholder="Entrez votre pseudo..." maxlength="15" autocomplete="off">
+            <button id="join-btn">Rejoindre l'appel</button>
         </div>
     </div>
 
@@ -135,33 +112,57 @@
     </div>
 
     <script>
+        // On attend que la page soit complètement chargée pour activer le bouton
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("join-btn").addEventListener("click", rejoindreSalon);
+        });
+
         function rejoindreSalon() {
             const pseudo = document.getElementById('username').value.trim();
             if (pseudo === "") {
-                alert("Mets un pseudo d'abord ! 😉");
+                alert("Veuillez entrer un pseudo.");
                 return;
             }
 
-            // On bascule d'écran
+            // Changement d'écran
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('vocal-screen').style.display = 'block';
 
-            // Configuration Jitsi optimisée MOBILE avec CHAT
+            // Vérification que la bibliothèque Jitsi est bien chargée
+            if (typeof JitsiMeetExternalAPI === 'undefined') {
+                alert("Erreur : Impossible de se connecter aux serveurs audio. Veuillez actualiser la page.");
+                return;
+            }
+
             const domain = "meet.jit.si";
             const options = {
-                roomName: "SalonVocalEtChatCyberUltra9988", // Ton salon unique
+                roomName: "SalonVocalStandardPrive998877", // Nom du salon unique en arrière-plan
                 width: "100%",
                 height: "100%",
                 parentNode: document.querySelector('#jitsi-container'),
                 userInfo: { displayName: pseudo },
                 configOverwrite: {
-                    startWithVideoMuted: true, // Pas de caméra au début
+                    startWithVideoMuted: true, // Caméra désactivée
                     startWithAudioMuted: false, // Micro activé directement
-                    prejoinPageEnabled: false, // Connexion instantanée
-                    openBridgeChannel: 'websocket',
-                    
-                    // Force l'affichage du chat dès le début
-                    requireDisplayName: false,
-                    hideConferenceSubject: true
+                    prejoinPageEnabled: false, // Pas d'écran de chargement Jitsi intermédiaire
+                    disableDeepLinking: true // Empêche Jitsi de forcer l'ouverture de son application mobile
                 },
-        
+                interfaceConfigOverwrite: {
+                    // Uniquement les boutons nécessaires : Micro, Chat, Raccrocher
+                    TOOLBAR_BUTTONS: ['microphone', 'chat', 'hangup', 'tileview'],
+                    MOBILE_APP_PROMO: false // Supprime les publicités pour l'application mobile
+                }
+            };
+
+            // Initialisation de l'appel
+            const api = new JitsiMeetExternalAPI(domain, options);
+
+            // Retour à l'accueil si l'utilisateur raccroche
+            api.addEventListener('videoConferenceLeft', () => {
+                api.dispose();
+                location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
