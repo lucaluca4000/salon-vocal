@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Salon Vocal Privé</title>
+    
+    <script src="https://meet.jit.si/external_api.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e2e;
+            color: #cdd6f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #313244;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        h1 { color: #89b4fa; margin-bottom: 20px; }
+        input {
+            width: 80%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #a6e3a1;
+            color: #11111b;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background-color: #94e2d5; }
+        #status { margin-top: 15px; font-style: italic; color: #a6adc8; }
+        
+        /* TRÈS IMPORTANT : On cache la vidéo Jitsi pour ne garder que le son */
+        #vocal-hidden { width: 1px; height: 1px; opacity: 0; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎙️ Salon Vocal</h1>
+        <p>Entrez votre pseudo pour rejoindre instantanément l'appel global.</p>
+        
+        <div id="login-box">
+            <input type="text" id="username" placeholder="Ex: Jean, Anonyme..." maxlength="15">
+            <br>
+            <button onclick="connecterAuVocal()">Rejoindre l'appel</button>
+        </div>
+
+        <div id="status">Hors ligne</div>
+    </div>
+
+    <div id="vocal-hidden"></div>
+
+    <script>
+        function connecterAuVocal() {
+            const pseudo = document.getElementById('username').value.trim();
+            
+            if (pseudo === "") {
+                alert("S'il te plaît, choisis un pseudo !");
+                return;
+            }
+
+            // Modifier l'interface
+            document.getElementById('login-box').style.display = 'none';
+            document.getElementById('status').innerText = "Connexion en cours...";
+
+            // Configuration du salon de discussion
+            const domain = "meet.jit.si";
+            const options = {
+                // CHANGEZ CE NOM CI-DESSOUS pour que personne ne vienne par hasard sur votre salon
+                roomName: "SalonVocalSuperUniquePourMonSite998877", 
+                parentNode: document.querySelector('#vocal-hidden'),
+                userInfo: { displayName: pseudo },
+                configOverwrite: {
+                    startWithVideoMuted: true, // Pas de caméra
+                    startWithAudioMuted: false, // Micro activé directement
+                    prejoinPageEnabled: false, // Pas de page d'attente, connexion directe
+                    videoQuality: { maxPreference: 0 } // Économise la connexion en coupant les flux vidéos
+                }
+            };
+
+            // Lancement de l'appel en arrière-plan
+            const api = new JitsiMeetExternalAPI(domain, options);
+
+            // Une fois connecté
+            document.getElementById('status').innerHTML = "🟢 Connecté en direct sous le pseudo : <b>" + pseudo + "</b><br><br>Parlez maintenant ! Tout le monde vous entend.";
+        }
+    </script>
+</body>
+</html>
