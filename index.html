@@ -2,82 +2,86 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salon Vocal</title>
     <script src="https://meet.jit.si/external_api.js"></script>
-
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: #000; font-family: sans-serif; overflow: hidden; }
+        body { margin: 0; padding: 0; background: #0b0e14; color: #fff; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; }
         
-        .accueil { 
-            display: flex; align-items: center; justify-content: center; height: 100%; 
-            background: #111; color: #fff; flex-direction: column; 
-        }
-        input { 
-            padding: 15px; width: 250px; border-radius: 10px; border: none; margin-bottom: 20px; 
-            text-align: center; font-size: 16px; background: #222; color: #fff;
-        }
-        button { 
-            padding: 15px 40px; border-radius: 10px; border: none; background: #fff; 
-            font-weight: bold; cursor: pointer; animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-        }
+        /* Menu de choix */
+        .dashboard { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 15px; }
+        h2 { margin-bottom: 20px; font-weight: 300; }
         
-        #appel { display: none; width: 100%; height: 100%; }
+        .btn-channel { 
+            padding: 15px 30px; width: 200px; border-radius: 10px; border: none; 
+            background: #1c2330; color: #fff; font-size: 18px; cursor: pointer;
+            transition: 0.3s; border: 1px solid #333;
+        }
+        .btn-channel:hover { background: #2a3547; border-color: #00ffaa; }
+        
+        /* Zone d'appel */
+        #appel { display: none; width: 100%; height: 100%; position: relative; }
+        
+        /* Bouton retour */
+        #btn-quitter { 
+            position: absolute; top: 10px; right: 10px; z-index: 1000;
+            padding: 10px 20px; background: #ff4a4a; border: none; border-radius: 5px; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <div class="accueil" id="accueil">
-        <h2 style="margin-bottom:30px;">Connexion au salon</h2>
-        <input type="text" id="pseudo" placeholder="Votre pseudo..." maxlength="12">
-        <button onclick="lancer()">Rejoindre</button>
+    <!-- Tableau de bord -->
+    <div class="dashboard" id="dashboard">
+        <h2>Choisir un salon</h2>
+        <input type="text" id="pseudo" placeholder="Ton pseudo..." style="padding:10px; border-radius:5px; border:none; margin-bottom:10px;">
+        <button class="btn-channel" onclick="rejoindre(1)">Vocal 1</button>
+        <button class="btn-channel" onclick="rejoindre(2)">Vocal 2</button>
+        <button class="btn-channel" onclick="rejoindre(3)">Vocal 3</button>
+        <button class="btn-channel" onclick="rejoindre(4)">Vocal 4</button>
+        <button class="btn-channel" onclick="rejoindre(5)">Vocal 5</button>
     </div>
 
-    <div id="appel"></div>
+    <!-- Zone appel -->
+    <div id="appel">
+        <button id="btn-quitter" onclick="quitter()">Quitter</button>
+    </div>
 
     <script>
-        function lancer() {
-            const p = document.getElementById('pseudo').value;
-            if(!p) return alert("Pseudo obligatoire");
-            
-            document.getElementById('accueil').style.display = 'none';
+        let api = null;
+
+        function rejoindre(num) {
+            const p = document.getElementById('pseudo').value || "Anonyme";
+            document.getElementById('dashboard').style.display = 'none';
             document.getElementById('appel').style.display = 'block';
 
             const options = {
-                roomName: "SalonPriveUnique123456789",
+                roomName: "MonSiteVocal-Salon-" + num,
                 parentNode: document.getElementById('appel'),
                 userInfo: { displayName: p },
                 configOverwrite: {
                     startWithAudioMuted: false,
                     startWithVideoMuted: true,
-                    disableDeepLinking: true,
                     hideConferenceSubject: true,
                     hideConferenceTimer: true,
-                    disableProfile: true, // Désactive le profil utilisateur
-                    disableInviteRevocation: true,
-                    // Tentative d'écrasement du logo via paramètres avancés
+                    disableDeepLinking: true,
                     watermark: false
                 },
                 interfaceConfigOverwrite: {
-                    // Masquage agressif des logos
                     SHOW_JITSI_WATERMARK: false,
                     SHOW_WATERMARK_FOR_GUESTS: false,
                     SHOW_BRAND_WATERMARK: false,
                     SHOW_POWERED_BY: false,
-                    HIDE_INVITE_MORE_HEADER: true,
-                    // Toolbar limitée au strict nécessaire
-                    TOOLBAR_BUTTONS: ['microphone', 'chat', 'hangup', 'tileview', 'settings']
+                    TOOLBAR_BUTTONS: ['microphone', 'chat', 'hangup']
                 }
             };
-            
-            const api = new JitsiMeetExternalAPI("meet.jit.si", options);
-            
-            api.addEventListener('videoConferenceLeft', () => { location.reload(); });
+            api = new JitsiMeetExternalAPI("meet.jit.si", options);
+        }
+
+        function quitter() {
+            if(api) api.dispose();
+            document.getElementById('appel').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
         }
     </script>
 </body>
